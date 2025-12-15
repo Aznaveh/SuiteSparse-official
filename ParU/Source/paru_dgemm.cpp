@@ -88,6 +88,10 @@ bool paru_dgemm
     PRLEVEL(1, ("%% ldc = " LD "\n", ldc));
 
     // double beta = 0;  // U part is not initialized
+#ifdef PARU_HAS_CUDA
+        PRLEVEL(PR, ("ParU has CUDA and can send dgemm to GPU\n"));
+#endif
+
 
     bool blas_ok = paru_tasked_dgemm(f, mA, nB, nA, pF + fp,
             lda, uPart, ldb, 0, el, ldc, Work, Num) ;
