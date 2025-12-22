@@ -589,6 +589,12 @@ ParU_Info ParU_Analyze
         }
     }
     PR = -1;
+#ifdef PARU_HAS_CUDA
+        PRLEVEL(-1, ("Analyze AZN ParU has CUDA and can send dgemm to GPU\n"));
+#else
+        PRLEVEL(-1, ("Analayze AZN ParU has no CUDA \n"));
+#endif
+
 
     PRLEVEL(PR, ("\nTotal number of pivot columns "
                  "in frontal matrices: " LD "\n",

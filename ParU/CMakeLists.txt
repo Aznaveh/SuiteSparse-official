@@ -126,7 +126,6 @@ include ( SuiteSparseBLAS )     # requires cmake 3.22
 #-------------------------------------------------------------------------------
 # find CUDA
 #-------------------------------------------------------------------------------
-
 option ( PARU_USE_CUDA "ON (default): enable CUDA acceleration for PARU, OFF: do not use CUDA" ${SUITESPARSE_USE_CUDA} )
 if ( NOT SUITESPARSE_USE_CUDA )
     set ( PARU_USE_CUDA "OFF" CACHE STRING "" FORCE )
@@ -138,6 +137,7 @@ if ( SUITESPARSE_HAS_CUDA AND PARU_USE_CUDA )
 else ( )
     set ( PARU_HAS_CUDA OFF )
 endif ( )
+message ( STATUS "ParU has CUDA: ${PARU_HAS_CUDA}" )
 
 # check for strict usage
 if ( SUITESPARSE_USE_STRICT AND PARU_USE_CUDA AND NOT PARU_HAS_CUDA )
@@ -229,6 +229,11 @@ if (( NOT PARU_HAS_OPENMP ) OR
 else ( )
     message ( STATUS "ParU frontal tree tasking: parallel")
 endif ( )
+
+if (PARU_HAS_CUDA)
+        target_compile_definitions ( ParU PUBLIC "PARU_HAS_CUDA" )
+endif ( )
+
 
 #-------------------------------------------------------------------------------
 # add the library dependencies

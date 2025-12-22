@@ -433,9 +433,9 @@ typedef struct  /* SWType */
 //------------------------------------------------------------------------------
 
 // for printing information uncomment this; to activate assertions uncomment
-// #undef NPR
+#undef NPR
 // uncomment the following line to turn on debugging mode
-// #undef NDEBUG
+#undef NDEBUG
 // uncomment the following line to turn on OpenMP timing
 // #undef NTIME
 

@@ -89,7 +89,9 @@ bool paru_dgemm
 
     // double beta = 0;  // U part is not initialized
 #ifdef PARU_HAS_CUDA
-        PRLEVEL(PR, ("ParU has CUDA and can send dgemm to GPU\n"));
+        PRLEVEL(-1, ("AZN ParU has CUDA and can send dgemm to GPU\n"));
+#else
+        PRLEVEL(-1, ("AZN ParU has no CUDA \n"));
 #endif
 
 
