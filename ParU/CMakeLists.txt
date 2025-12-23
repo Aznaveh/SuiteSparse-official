@@ -138,6 +138,7 @@ else ( )
     set ( PARU_HAS_CUDA OFF )
 endif ( )
 message ( STATUS "ParU has CUDA: ${PARU_HAS_CUDA}" )
+message ( STATUS "ParU use CUDA: ${PARU_USE_CUDA}" )
 
 # check for strict usage
 if ( SUITESPARSE_USE_STRICT AND PARU_USE_CUDA AND NOT PARU_HAS_CUDA )
@@ -232,6 +233,7 @@ endif ( )
 
 if (PARU_HAS_CUDA)
         target_compile_definitions ( ParU PUBLIC "PARU_HAS_CUDA" )
+        target_compile_definitions ( ParU PUBLIC "PARU_USE_CUDA" )
 endif ( )
 
 
