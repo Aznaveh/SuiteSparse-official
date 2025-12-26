@@ -88,19 +88,11 @@ bool paru_dgemm
     PRLEVEL(1, ("%% ldc = " LD "\n", ldc));
 
     // double beta = 0;  // U part is not initialized
-#ifdef PARU_HAS_CUDA
-        PRLEVEL(-1, ("AZN ParU has CUDA \n"));
-#else
-        PRLEVEL(-1, ("AZN ParU has no CUDA \n"));
-#endif
-
-#ifdef PARU_USE_CUDA
-        PRLEVEL(-1, ("AZN ParU is using CUDA \n"));
-#endif
-
-
-    bool blas_ok = paru_tasked_dgemm(f, mA, nB, nA, pF + fp,
-            lda, uPart, ldb, 0, el, ldc, Work, Num) ;
+	if (!blas_ok) 
+	{
+		blas_ok = paru_tasked_dgemm(f, mA, nB, nA, pF + fp,
+				lda, uPart, ldb, 0, el, ldc, Work, Num) ;
+	}
 
 #ifndef NDEBUG
     int64_t PR = 1;

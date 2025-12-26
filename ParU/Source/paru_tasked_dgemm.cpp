@@ -100,6 +100,20 @@ bool paru_tasked_dgemm
     }
     else
     {
+#ifdef PARU_HAS_CUDA
+	    PRLEVEL(-1, ("AZN ParU has CUDA \n"));
+#else
+	    PRLEVEL(-1, ("AZN ParU has no CUDA \n"));
+#endif
+	    bool blas_ok;
+#ifdef PARU_USE_CUDA
+	    PRLEVEL(-1, ("AZN ParU is using CUDA \n"));
+	    blas_ok = paru_cuda_dgemm(f, mA, nB, nA, pF + fp,
+			    lda, uPart, ldb, 0, el, ldc, Work, Num) ;
+	return blas_ok;
+#endif
+
+
 
         //----------------------------------------------------------------------
         // parallel dgemm
