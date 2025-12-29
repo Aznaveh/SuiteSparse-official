@@ -88,11 +88,8 @@ bool paru_dgemm
     PRLEVEL(1, ("%% ldc = " LD "\n", ldc));
 
     // double beta = 0;  // U part is not initialized
-	if (!blas_ok) 
-	{
-		blas_ok = paru_tasked_dgemm(f, mA, nB, nA, pF + fp,
-				lda, uPart, ldb, 0, el, ldc, Work, Num) ;
-	}
+    bool blas_ok = paru_tasked_dgemm(f, mA, nB, nA, pF + fp,
+            lda, uPart, ldb, 0, el, ldc, Work, Num) ;
 
 #ifndef NDEBUG
     int64_t PR = 1;

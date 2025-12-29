@@ -38,6 +38,12 @@ bool paru_tasked_dgemm
     int64_t trivial = Work->trivial ;
     bool small = (M < worthwhile_dgemm && N < worthwhile_dgemm) ;
     bool tiny = (M < trivial && N < trivial && K < trivial) ;
+    bool use_gpu = false;
+    
+#ifdef PARU_USE_CUDA
+    use_gpu = true;
+#endif
+    
 
     #define CHUNK ((double) 5e8)
     double work = ((double) M) * ((double) N) * ((double) K) ;
@@ -80,7 +86,7 @@ bool paru_tasked_dgemm
         }
 
     }
-    else if (small || (naft >= nth))
+    else if (small || (naft >= nth && !use_gpu))
     {
 
         //----------------------------------------------------------------------
@@ -98,7 +104,7 @@ bool paru_tasked_dgemm
         BLAS_set_num_threads_local (prior) ;
 
     }
-    else
+    else if (use_gpu)
     {
 #ifdef PARU_HAS_CUDA
 	    PRLEVEL(-1, ("AZN ParU has CUDA \n"));
@@ -112,9 +118,9 @@ bool paru_tasked_dgemm
 			    lda, uPart, ldb, 0, el, ldc, Work, Num) ;
 	return blas_ok;
 #endif
-
-
-
+    }
+    else
+    {
         //----------------------------------------------------------------------
         // parallel dgemm
         //----------------------------------------------------------------------
