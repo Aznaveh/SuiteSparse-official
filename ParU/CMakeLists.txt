@@ -231,9 +231,16 @@ else ( )
     message ( STATUS "ParU frontal tree tasking: parallel")
 endif ( )
 
+#-------------------------------------------------------------------------------
+# add the CUDA stuff
+#-------------------------------------------------------------------------------
+
+
 if (PARU_HAS_CUDA)
         target_compile_definitions ( ParU PUBLIC "PARU_HAS_CUDA" )
         target_compile_definitions ( ParU PUBLIC "PARU_USE_CUDA" )
+        add_subdirectory ( GPU )
+        message ( STATUS "CUDA libraries: " ${CUDA_LIBRARIES} )
 endif ( )
 
 
