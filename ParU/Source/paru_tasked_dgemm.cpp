@@ -114,8 +114,8 @@ bool paru_tasked_dgemm
 	    bool blas_ok;
 #ifdef PARU_USE_CUDA
 	    PRLEVEL(-1, ("AZN ParU is using CUDA \n"));
-	    blas_ok = paru_cuda_dgemm(f, M, N, K, pF + fp,
-			    lda, uPart, ldb, 0, el, ldc, Work, Num) ;
+	    blas_ok = paru_cuda_dgemm( M, N, K, A,
+			    lda, B, ldb, 0, C, ldc, Work, Num) ;
 	return blas_ok;
 #endif
     }

@@ -15,9 +15,9 @@
 #include "paru_internal.hpp"
 
 #ifdef PARU_USE_CUDA
+#include<cublas_v2.h> 
 bool paru_cuda_dgemm
 (
-    int64_t f,
     int64_t M,
     int64_t N,
     int64_t K,
