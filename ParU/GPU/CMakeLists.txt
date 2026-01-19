@@ -24,30 +24,30 @@ enable_language ( CXX )
 
 message ( STATUS "C++ flags for CUDA:  ${CMAKE_CXX_FLAGS}" )
 
-#file ( GLOB PARU_CUDA_SOURCES "spqrgpu_*.cpp" )
+file ( GLOB PARU_CUDA_SOURCES "paru_cuda_*.cpp" )
 
 if ( BUILD_SHARED_LIBS )
-    target_sources ( PARU PRIVATE ${PARU_CUDA_SOURCES} )
+    target_sources ( ParU PRIVATE ${PARU_CUDA_SOURCES} )
 endif ( )
 
 if ( BUILD_STATIC_LIBS )
-    target_sources ( PARU_static PRIVATE ${PARU_CUDA_SOURCES} )
+    target_sources ( ParU_static PRIVATE ${PARU_CUDA_SOURCES} )
 endif ( )
 
 if ( BUILD_SHARED_LIBS )
-    set_target_properties ( PARU PROPERTIES POSITION_INDEPENDENT_CODE ON )
-    set_target_properties ( PARU PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
-    target_compile_definitions ( PARU PRIVATE "PARU_HAS_CUDA" )
+    set_target_properties ( ParU PROPERTIES POSITION_INDEPENDENT_CODE ON )
+    set_target_properties ( ParU PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
+    target_compile_definitions ( ParU PRIVATE "PARU_HAS_CUDA" )
 
-    target_link_libraries ( PARU PRIVATE
+    target_link_libraries ( ParU PRIVATE
         CUDA::nvrtc CUDA::cudart_static CUDA::cublas )
 endif ( )
 
 if ( BUILD_STATIC_LIBS )
-    set_target_properties ( PARU_static PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
-    set_target_properties ( PARU_static PROPERTIES POSITION_INDEPENDENT_CODE ON )
-    target_compile_definitions ( PARU_static PRIVATE "PARU_HAS_CUDA" )
+    set_target_properties ( ParU_static PROPERTIES CUDA_SEPARABLE_COMPILATION ON )
+    set_target_properties ( ParU_static PROPERTIES POSITION_INDEPENDENT_CODE ON )
+    target_compile_definitions ( ParU_static PRIVATE "PARU_HAS_CUDA" )
 
-    target_link_libraries ( PARU_static PRIVATE
+    target_link_libraries ( ParU_static PRIVATE
         CUDA::nvrtc CUDA::cudart_static CUDA::cublas )
 endif ( )
