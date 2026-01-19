@@ -1263,5 +1263,23 @@ static inline int paru_nthreads_to_use // return # of threads to use
     return ((int) nthreads) ;
 }
 
+#if defined (PARU_HAS_CUDA)
+bool paru_cuda_dgemm
+(
+    int64_t M,
+    int64_t N,
+    int64_t K,
+    double *A,
+    int64_t lda,
+    double *B,
+    int64_t ldb,
+    double beta,
+    double *C,
+    int64_t ldc,
+    paru_work *Work,
+    ParU_Numeric Num
+);
+#endif 
+
 #endif
 

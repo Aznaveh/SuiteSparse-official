@@ -38,10 +38,10 @@ bool paru_cuda_dgemm
     cublasHandle_t handle;
     cublasCreate(&handle);
 
-    //double *d_A, *d_B, *d_C;
-    //cudaMalloc(&d_A, M * K * sizeof(double));
-    //cudaMalloc(&d_B, K * N * sizeof(double));
-    //cudaMalloc(&d_C, M * N * sizeof(double));
+    double *d_A, *d_B, *d_C;
+    cudaMalloc((void**)&d_A, M * K * sizeof(double));
+    cudaMalloc((void**)&d_B, K * N * sizeof(double));
+    cudaMalloc((void**)&d_C, M * N * sizeof(double));
 
     //// 4. Transfer data from Host to Device
     //cublasSetMatrix(M, K, sizeof(double), A, M, d_A, M);
