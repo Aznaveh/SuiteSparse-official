@@ -41,6 +41,11 @@ bool paru_tasked_dtrsm
     int64_t naft;
 
     bool blas_ok = true ;
+    bool use_gpu = false;
+
+#ifdef PARU_USE_CUDA
+    use_gpu = true;
+#endif
 
     #define CHUNK ((double) 5e8)
     double work = ((double) m) * ((double) m) * ((double) n) ;
@@ -51,7 +56,20 @@ bool paru_tasked_dtrsm
     naft = Work->naft;
     bool small = (n < worthwhile_dtrsm) ;
 
-    if (small || (naft >= nth))
+    if (use_gpu && !small && (naft < nth))
+    {
+
+        //----------------------------------------------------------------------
+        // GPU-accelerated dtrsm
+        //----------------------------------------------------------------------
+
+        PRLEVEL(1, ("GPU DTRSM (" LD "x" LD ") in " LD "\n", m, n, f));
+#ifdef PARU_HAS_CUDA
+        blas_ok = paru_cuda_dtrsm(m, n, alpha, a, lda, b, ldb, Work, Num);
+#endif
+
+    }
+    else if (small || (naft >= nth))
     {
 
         //----------------------------------------------------------------------

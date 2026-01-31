@@ -158,6 +158,14 @@ configure_file ( "Config/paru_version.tex.in"
 include_directories ( Source Include )
 
 #-------------------------------------------------------------------------------
+# add the CUDA definitions early (before creating targets)
+#-------------------------------------------------------------------------------
+
+if ( PARU_HAS_CUDA )
+    add_compile_definitions ( PARU_HAS_CUDA PARU_USE_CUDA )
+endif ( )
+
+#-------------------------------------------------------------------------------
 # dynamic paru library properties
 #-------------------------------------------------------------------------------
 
@@ -237,8 +245,6 @@ endif ( )
 
 
 if (PARU_HAS_CUDA)
-        target_compile_definitions ( ParU PUBLIC "PARU_HAS_CUDA" )
-        target_compile_definitions ( ParU PUBLIC "PARU_USE_CUDA" )
         add_subdirectory ( GPU )
         message ( STATUS "CUDA libraries: " ${CUDA_LIBRARIES} )
 endif ( )

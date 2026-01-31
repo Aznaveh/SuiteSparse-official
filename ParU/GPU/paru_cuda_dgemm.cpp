@@ -6,8 +6,9 @@
 // All Rights Reserved.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/*! @brief      a wrapper around CUDA_DGEMM for tasked base dgemmed
+/*! @brief      GPU-accelerated DGEMM using cuBLAS
  *
+ * Performs C = -A*B + beta*C on GPU using cuBLAS
  *
  * @author Aznaveh
  */
@@ -15,7 +16,29 @@
 #include "paru_internal.hpp"
 
 #ifdef PARU_USE_CUDA
-#include<cublas_v2.h> 
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+
+// Global cuBLAS handle (created once during first use)
+static cublasHandle_t paru_cublas_handle = nullptr;
+static bool paru_cublas_initialized = false;
+
+// Initialize cuBLAS handle (thread-safe via first call)
+static bool paru_cuda_init_handle()
+{
+    if (!paru_cublas_initialized)
+    {
+        cublasStatus_t status = cublasCreate(&paru_cublas_handle);
+        if (status != CUBLAS_STATUS_SUCCESS)
+        {
+            PRLEVEL(-1, ("Error creating cuBLAS handle\n"));
+            return false;
+        }
+        paru_cublas_initialized = true;
+    }
+    return true;
+}
+
 bool paru_cuda_dgemm
 (
     int64_t M,
@@ -32,38 +55,108 @@ bool paru_cuda_dgemm
     ParU_Numeric Num
 )
 {
+    if (!paru_cuda_init_handle())
+    {
+        PRLEVEL(-1, ("Failed to initialize cuBLAS\n"));
+        return false;
+    }
 
-    bool blas_ok = false;
+    // alpha is always -1 in ParU DGEMMs
+    double alpha = -1.0;
+    
+    // Allocate device memory
+    double *d_A = nullptr, *d_B = nullptr, *d_C = nullptr;
+    
+    cudaError_t cuda_err = cudaMalloc((void**)&d_A, M * K * sizeof(double));
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA malloc failed for d_A\n"));
+        return false;
+    }
+    
+    cuda_err = cudaMalloc((void**)&d_B, K * N * sizeof(double));
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA malloc failed for d_B\n"));
+        cudaFree(d_A);
+        return false;
+    }
+    
+    cuda_err = cudaMalloc((void**)&d_C, M * N * sizeof(double));
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA malloc failed for d_C\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        return false;
+    }
 
-    cublasHandle_t handle;
-    cublasCreate(&handle);
+    // Transfer data from Host to Device
+    cuda_err = cudaMemcpy(d_A, A, M * K * sizeof(double), cudaMemcpyHostToDevice);
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA memcpy failed for A\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return false;
+    }
+    
+    cuda_err = cudaMemcpy(d_B, B, K * N * sizeof(double), cudaMemcpyHostToDevice);
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA memcpy failed for B\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return false;
+    }
+    
+    cuda_err = cudaMemcpy(d_C, C, M * N * sizeof(double), cudaMemcpyHostToDevice);
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA memcpy failed for C\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return false;
+    }
 
-    double *d_A, *d_B, *d_C;
-    cudaMalloc((void**)&d_A, M * K * sizeof(double));
-    cudaMalloc((void**)&d_B, K * N * sizeof(double));
-    cudaMalloc((void**)&d_C, M * N * sizeof(double));
+    // Perform DGEMM on GPU: C = alpha*A*B + beta*C
+    cublasStatus_t status = cublasDgemm(paru_cublas_handle,
+                                         CUBLAS_OP_N, CUBLAS_OP_N,
+                                         M, N, K,
+                                         &alpha,
+                                         d_A, M,
+                                         d_B, K,
+                                         &beta,
+                                         d_C, M);
+    if (status != CUBLAS_STATUS_SUCCESS)
+    {
+        PRLEVEL(-1, ("cuBLAS DGEMM failed\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return false;
+    }
 
-    //// 4. Transfer data from Host to Device
-    //cublasSetMatrix(M, K, sizeof(double), A, M, d_A, M);
-    //cublasSetMatrix(K, N, sizeof(double), B, K, d_B, K);
-    //cublasSetMatrix(M, N, sizeof(double), C, M, d_C, M);
+    // Transfer result back to Host
+    cuda_err = cudaMemcpy(C, d_C, M * N * sizeof(double), cudaMemcpyDeviceToHost);
+    if (cuda_err != cudaSuccess)
+    {
+        PRLEVEL(-1, ("CUDA memcpy failed for result\n"));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return false;
+    }
 
-    //cublasDgemm(handle,
-    //            CUBLAS_OP_N, CUBLAS_OP_N,
-    //            M, N, K,
-    //            &alpha,
-    //            d_A, M,
-    //            d_B, K,
-    //            &beta,
-    //            d_C, M);
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
 
-    //cublasGetMatrix(M, N, sizeof(double), d_C, M, C, m);
-
-    cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);
-    cublasDestroy(handle);
-
-
-    return (blas_ok) ;
+    return true;
 }
+
 #endif
 

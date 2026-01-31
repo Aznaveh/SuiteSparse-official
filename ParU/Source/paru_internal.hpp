@@ -1231,6 +1231,39 @@ bool paru_tasked_dtrsm
     ParU_Numeric Num
 ) ;
 
+#ifdef PARU_USE_CUDA
+
+bool paru_cuda_dgemm
+(
+    int64_t M,
+    int64_t N,
+    int64_t K,
+    double *A,
+    int64_t lda,
+    double *B,
+    int64_t ldb,
+    double beta,
+    double *C,
+    int64_t ldc,
+    paru_work *Work,
+    ParU_Numeric Num
+) ;
+
+bool paru_cuda_dtrsm
+(
+    int64_t m,
+    int64_t n,
+    double alpha,
+    double *a,
+    int64_t lda,
+    double *b,
+    int64_t ldb,
+    paru_work *Work,
+    ParU_Numeric Num
+) ;
+
+#endif
+
 ParU_Info paru_free_work
 (
     const ParU_Symbolic Sym,
